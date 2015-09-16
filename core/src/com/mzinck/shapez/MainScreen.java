@@ -12,7 +12,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.mzinck.shapez.shapes.Shape;
 import com.mzinck.shapez.shapes.ShapeDefs;
 
@@ -30,12 +32,17 @@ public class MainScreen extends ApplicationAdapter {
 	private SpriteBatch			batch;
 	private OrthographicCamera	cam;
 
-	private Player	player;
-	private ArrayList<Shape> shapes;
+	private Player				player;
+	private ArrayList<Shape>	shapes;
 
 	private Texture			swordSpriteSheet;
 	private TextureRegion[]	weapons	= new TextureRegion[4];
 	private TextureRegion	sword;
+
+	private boolean	animateSword		= false;
+	private int		swordAnimationSteps	= 0;
+	private float	swordX;
+	private float	swordY;
 
 	@Override
 	public void create() {
@@ -44,11 +51,13 @@ public class MainScreen extends ApplicationAdapter {
 
 		player = new Player(Constants.PLAYER_START_SPEED,
 				Constants.PLAYER_START_SIZE);
-		
+
 		shapes = new ArrayList<Shape>();
-		
-		for(int i = 0; i < 10; i++) {
-			shapes.add(new Shape(ShapeDefs.ZOMBIE, player, MathUtils.random(500), MathUtils.random(500), MathUtils.random(0.3F, 0.7F)));
+
+		for (int i = 0; i < 10; i++) {
+			shapes.add(new Shape(ShapeDefs.ZOMBIE, player,
+					MathUtils.random(500), MathUtils.random(500),
+					MathUtils.random(0.3F, 0.7F), Constants.SHAPE_START_SIZE));
 		}
 
 		rotationSpeed = 0.5f;
@@ -68,7 +77,11 @@ public class MainScreen extends ApplicationAdapter {
 	@Override
 	public void render() {
 		handleInput();
-		for(Shape shape : shapes) {
+		if (animateSword == true) {
+			swordAnimation();
+		}
+
+		for (Shape shape : shapes) {
 			shape.update();
 		}
 		cam.update();
@@ -82,11 +95,44 @@ public class MainScreen extends ApplicationAdapter {
 		shapeRend.setAutoShapeType(true);
 		renderBackground();
 		renderPlayer();
+		renderShapes();
 		shapeRend.end();
 
 		batch.begin();
-		batch.draw(sword, cam.position.x, cam.position.y, player.getSize(), 15);
+		float array[] = getHypotenuse(false);
+		swordX = array[0] + cam.position.x;
+		swordY = array[1] + cam.position.y;
+
+		batch.draw(sword.getTexture(), swordX, swordY,
+				player.getSize() / 2, 0, player.getSize(), 15F, 1F, 1F,
+				-swordAnimationSteps * 15, sword.getRegionX(),
+				sword.getRegionY(), sword.getRegionWidth(),
+				sword.getRegionHeight(), false, false);
 		batch.end();
+	}
+
+	public float[] getHypotenuse(boolean p) {
+		float array[] = { 0, 0 };
+		float x = (Gdx.input.getX() - 826);
+		float y = (Gdx.input.getY() - 420);
+		float hypotenuse = (float) Math.pow(Math.pow(x, 2) + Math.pow(y, 2),
+				0.5);
+
+		float scaleValue = (p == true)
+				? (float) (player.getSpeed() / hypotenuse)
+				: (float) (10 / hypotenuse);
+
+		if ((x < 100 && x > -100) && (y < 100 && y > -100) && p == true) {
+			x = x / 100;
+			y = y / 100 * -1;
+		} else {
+			x = x * scaleValue;
+			y = y * scaleValue * -1;
+		}
+
+		array[0] = x;
+		array[1] = y;
+		return array;
 	}
 
 	public void renderPlayer() {
@@ -94,10 +140,12 @@ public class MainScreen extends ApplicationAdapter {
 		shapeRend.setColor(0, 1, 0, 1);
 		shapeRend.rect(cam.position.x, cam.position.y, player.getSize(),
 				player.getSize());
-		
-		for(Shape shape : shapes) {
-		shapeRend.rect(shape.getxPos(), shape.getyPos(), player.getSize(),
-				player.getSize());
+	}
+	
+	public void renderShapes() {
+		for (Shape shape : shapes) {
+			shapeRend.rect(shape.getxPos(), shape.getyPos(), shape.getSize(),
+					shape.getSize());
 		}
 	}
 
@@ -120,26 +168,23 @@ public class MainScreen extends ApplicationAdapter {
 	 * values that the player can move.
 	 * 
 	 */
-	private void handleInput() {
-		double x = (Gdx.input.getX() - 826);
-		double y = (Gdx.input.getY() - 420);
-		double hypotenuse = Math.pow(Math.pow(x, 2) + Math.pow(y, 2), 0.5);
+	public void handleInput() {
+		float xy[] = getHypotenuse(true);
 
-		float scaleValue = (float) (player.getSpeed() / hypotenuse);
-
-		if ((x < 100 && x > -100) && (y < 100 && y > -100)) {
-			x = x / 100;
-			y = y / 100 * -1;
-		} else {
-			x = x * scaleValue;
-			y = y * scaleValue * -1;
-		}
+		float x = xy[0];
+		float y = xy[1];
 
 		if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
 			player.setSize(player.getSize() + 0.1F);
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
 			player.setSize(player.getSize() - 0.1F);
+		}
+		if (Gdx.input.isTouched()) {
+			if (animateSword == false) {
+				animateSword = true;
+				swordAnimationSteps = 0;
+			}
 		}
 
 		// if(y < 100 && y > -100) {
@@ -165,6 +210,31 @@ public class MainScreen extends ApplicationAdapter {
 
 		player.setX(cam.position.x);
 		player.setY(cam.position.y);
+	}
+
+	public void swordAnimation() {
+		if (swordAnimationSteps > Constants.SWORD_STEPS_MAX) {
+			swordAnimationSteps = 0;
+			animateSword = false;
+		} else {
+			swordAnimationSteps++;
+			swordCollision();
+		}
+	}
+
+	public void swordCollision() {
+		Rectangle swordRect = new Rectangle(swordX, swordY, 15F, 15F);
+		Rectangle rect = new Rectangle();
+		for(Shape shape : shapes) {
+			rect.x = shape.getxPos();
+			rect.y = shape.getyPos();
+			rect.width = shape.getSize();
+			rect.height = shape.getSize();
+			
+			if(swordRect.overlaps(rect)) {
+				shape.setDead();
+			}
+		}
 	}
 
 	@Override
