@@ -103,10 +103,9 @@ public class MainScreen extends ApplicationAdapter {
 		swordX = array[0] + cam.position.x;
 		swordY = array[1] + cam.position.y;
 
-		batch.draw(sword.getTexture(), swordX, swordY,
-				player.getSize() / 2, 0, player.getSize(), 15F, 1F, 1F,
-				-swordAnimationSteps * 15, sword.getRegionX(),
-				sword.getRegionY(), sword.getRegionWidth(),
+		batch.draw(sword.getTexture(), swordX, swordY, player.getSize() / 2, 0,
+				player.getSize(), 15F, 1F, 1F, -swordAnimationSteps * 15,
+				sword.getRegionX(), sword.getRegionY(), sword.getRegionWidth(),
 				sword.getRegionHeight(), false, false);
 		batch.end();
 	}
@@ -141,7 +140,7 @@ public class MainScreen extends ApplicationAdapter {
 		shapeRend.rect(cam.position.x, cam.position.y, player.getSize(),
 				player.getSize());
 	}
-	
+
 	public void renderShapes() {
 		for (Shape shape : shapes) {
 			shapeRend.rect(shape.getxPos(), shape.getyPos(), shape.getSize(),
@@ -225,13 +224,13 @@ public class MainScreen extends ApplicationAdapter {
 	public void swordCollision() {
 		Rectangle swordRect = new Rectangle(swordX, swordY, 15F, 15F);
 		Rectangle rect = new Rectangle();
-		for(Shape shape : shapes) {
+		for (Shape shape : shapes) {
 			rect.x = shape.getxPos();
 			rect.y = shape.getyPos();
 			rect.width = shape.getSize();
 			rect.height = shape.getSize();
-			
-			if(swordRect.overlaps(rect)) {
+
+			if (swordRect.overlaps(rect)) {
 				shape.setDead();
 			}
 		}
