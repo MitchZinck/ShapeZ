@@ -2,61 +2,61 @@ package com.mzinck.shapez;
 
 public class Player {
 
-	private int		speed;
-	private double	x;
-	private double	y;
-	private float	cameraSize	= 300F;
-	private float	size;
+    private int    speed;
+    private double x;
+    private double y;
+    private float  cameraSize = 300F;
+    private float  size;
 
-	private static final int MAX_VELOCITY = 1;
+    private static final int MAX_VELOCITY = 1;
 
-	public Player(int speed, float size) {
-		this.speed = speed;
-		this.size = size;
-	}
+    public Player(int speed, float size) {
+        this.speed = speed;
+        this.size = size;
+    }
 
-	private void update() {
+    private void update() {
 
-	}
+    }
 
-	public float getSize() {
-		return size;
-	}
+    public float getSize() {
+        return size;
+    }
 
-	public void setSize(float size) {
-		this.size = size;
-	}
-	
-	public int getSpeed() {
-		return speed;
-	}
+    public void setSize(float size) {
+        this.size = size;
+    }
 
-	public void setSpeed(int speed) {
-		this.speed = speed;
-	}
+    public int getSpeed() {
+        return speed;
+    }
 
-	public float getCameraSize() {
-		return cameraSize;
-	}
+    public void setSpeed(int speed) {
+        this.speed = speed;
+    }
 
-	public void setCameraSize(float cameraSize) {
-		this.cameraSize = cameraSize;
-	}
+    public float getCameraSize() {
+        return cameraSize;
+    }
 
-	public double getX() {
-		return x;
-	}
+    public void setCameraSize(float cameraSize) {
+        this.cameraSize = cameraSize;
+    }
 
-	public void setX(double x) {
-		this.x = x;
-	}
+    public double getX() {
+        return x;
+    }
 
-	public double getY() {
-		return y;
-	}
+    public void setX(double x) {
+        this.x = x;
+    }
 
-	public void setY(double y) {
-		this.y = y;
-	}
+    public double getY() {
+        return y;
+    }
+
+    public void setY(double y) {
+        this.y = y;
+    }
 
 }
