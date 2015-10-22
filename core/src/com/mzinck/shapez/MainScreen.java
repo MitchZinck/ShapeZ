@@ -25,237 +25,234 @@ import com.mzinck.shapez.shapes.ShapeDefs;
  */
 public class MainScreen extends ApplicationAdapter {
 
-	private float rotationSpeed;
+    private float rotationSpeed;
 
-	private ShapeRenderer		shapeRend;
-	private SpriteBatch			batch;
-	private OrthographicCamera	cam;
+    private ShapeRenderer      shapeRend;
+    private SpriteBatch        batch;
+    private OrthographicCamera cam;
+    private Player             player;
+    private ArrayList<Shape>   shapes;
+    private Texture            swordSpriteSheet;
+    private TextureRegion      sword;
+    private TextureRegion[]    weapons             = new TextureRegion[4];
+    private boolean            animateSword        = false;
+    private int                swordAnimationSteps = 0;
+    private float              swordX;
+    private float              swordY;
 
-	private Player				player;
-	private ArrayList<Shape>	shapes;
+    @Override
+    public void create() {
+        swordSpriteSheet = new Texture(Gdx.files.internal("Weapons.png"));
+        sword = new TextureRegion(swordSpriteSheet, 0F, 0F, 0.24F, 1F);
 
-	private Texture			swordSpriteSheet;
-	private TextureRegion[]	weapons	= new TextureRegion[4];
-	private TextureRegion	sword;
+        player = new Player(Constants.PLAYER_START_SPEED,
+                Constants.PLAYER_START_SIZE);
 
-	private boolean	animateSword		= false;
-	private int		swordAnimationSteps	= 0;
-	private float	swordX;
-	private float	swordY;
+        shapes = new ArrayList<Shape>();
 
-	@Override
-	public void create() {
-		swordSpriteSheet = new Texture(Gdx.files.internal("Weapons.png"));
-		sword = new TextureRegion(swordSpriteSheet, 0F, 0F, 0.24F, 1F);
+        for (int i = 0; i < 10; i++) {
+            shapes.add(new Shape(ShapeDefs.ZOMBIE, player,
+                    MathUtils.random(500), MathUtils.random(500),
+                    MathUtils.random(0.3F, 0.7F), Constants.SHAPE_START_SIZE));
+        }
 
-		player = new Player(Constants.PLAYER_START_SPEED,
-				Constants.PLAYER_START_SIZE);
+        rotationSpeed = 0.5f;
 
-		shapes = new ArrayList<Shape>();
+        float w = Gdx.graphics.getWidth();
+        float h = Gdx.graphics.getHeight();
+        cam = new OrthographicCamera(player.getCameraSize(),
+                player.getCameraSize() * (h / w));
+        cam.position.set(cam.viewportWidth / 2f, cam.viewportHeight / 2f, 0);
+        cam.update();
 
-		for (int i = 0; i < 10; i++) {
-			shapes.add(new Shape(ShapeDefs.ZOMBIE, player,
-					MathUtils.random(500), MathUtils.random(500),
-					MathUtils.random(0.3F, 0.7F), Constants.SHAPE_START_SIZE));
-		}
+        batch = new SpriteBatch();
 
-		rotationSpeed = 0.5f;
+        shapeRend = new ShapeRenderer();
+    }
 
-		float w = Gdx.graphics.getWidth();
-		float h = Gdx.graphics.getHeight();
-		cam = new OrthographicCamera(player.getCameraSize(),
-				player.getCameraSize() * (h / w));
-		cam.position.set(cam.viewportWidth / 2f, cam.viewportHeight / 2f, 0);
-		cam.update();
+    @Override
+    public void render() {
+        handleInput();
+        if (animateSword == true) {
+            swordAnimation();
+        }
 
-		batch = new SpriteBatch();
+        for (Shape shape : shapes) {
+            shape.update();
+        }
+        cam.update();
+        batch.setProjectionMatrix(cam.combined);
 
-		shapeRend = new ShapeRenderer();
-	}
+        Gdx.gl.glClearColor(1, 1, 1, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-	@Override
-	public void render() {
-		handleInput();
-		if (animateSword == true) {
-			swordAnimation();
-		}
+        shapeRend.setProjectionMatrix(cam.combined);
+        shapeRend.begin(ShapeType.Line);
+        shapeRend.setAutoShapeType(true);
+        renderBackground();
+        renderPlayer();
+        renderShapes();
+        shapeRend.end();
 
-		for (Shape shape : shapes) {
-			shape.update();
-		}
-		cam.update();
-		batch.setProjectionMatrix(cam.combined);
+        batch.begin();
+        float array[] = getHypotenuse(false);
+        swordX = array[0] + cam.position.x;
+        swordY = array[1] + cam.position.y;
 
-		Gdx.gl.glClearColor(1, 1, 1, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        batch.draw(sword.getTexture(), swordX, swordY, player.getSize() / 2, 0,
+                player.getSize(), 15F, 1F, 1F, -swordAnimationSteps * 15,
+                sword.getRegionX(), sword.getRegionY(), sword.getRegionWidth(),
+                sword.getRegionHeight(), false, false);
+        batch.end();
+    }
 
-		shapeRend.setProjectionMatrix(cam.combined);
-		shapeRend.begin(ShapeType.Line);
-		shapeRend.setAutoShapeType(true);
-		renderBackground();
-		renderPlayer();
-		renderShapes();
-		shapeRend.end();
+    public float[] getHypotenuse(boolean p) {
+        float array[] = { 0, 0 };
+        float x = (Gdx.input.getX() - 826);
+        float y = (Gdx.input.getY() - 420);
+        float hypotenuse = (float) Math.pow(Math.pow(x, 2) + Math.pow(y, 2),
+                0.5);
 
-		batch.begin();
-		float array[] = getHypotenuse(false);
-		swordX = array[0] + cam.position.x;
-		swordY = array[1] + cam.position.y;
+        float scaleValue = (p == true)
+                ? (float) (player.getSpeed() / hypotenuse)
+                : (float) (10 / hypotenuse);
 
-		batch.draw(sword.getTexture(), swordX, swordY, player.getSize() / 2, 0,
-				player.getSize(), 15F, 1F, 1F, -swordAnimationSteps * 15,
-				sword.getRegionX(), sword.getRegionY(), sword.getRegionWidth(),
-				sword.getRegionHeight(), false, false);
-		batch.end();
-	}
+        if ((x < 100 && x > -100) && (y < 100 && y > -100) && p == true) {
+            x = x / 100;
+            y = y / 100 * -1;
+        } else {
+            x = x * scaleValue;
+            y = y * scaleValue * -1;
+        }
 
-	public float[] getHypotenuse(boolean p) {
-		float array[] = { 0, 0 };
-		float x = (Gdx.input.getX() - 826);
-		float y = (Gdx.input.getY() - 420);
-		float hypotenuse = (float) Math.pow(Math.pow(x, 2) + Math.pow(y, 2),
-				0.5);
+        array[0] = x;
+        array[1] = y;
+        return array;
+    }
 
-		float scaleValue = (p == true)
-				? (float) (player.getSpeed() / hypotenuse)
-				: (float) (10 / hypotenuse);
+    public void renderPlayer() {
+        shapeRend.set(ShapeType.Filled);
+        shapeRend.setColor(0, 1, 0, 1);
+        shapeRend.rect(cam.position.x, cam.position.y, player.getSize(),
+                player.getSize());
+    }
 
-		if ((x < 100 && x > -100) && (y < 100 && y > -100) && p == true) {
-			x = x / 100;
-			y = y / 100 * -1;
-		} else {
-			x = x * scaleValue;
-			y = y * scaleValue * -1;
-		}
+    public void renderShapes() {
+        for (Shape shape : shapes) {
+            shapeRend.rect(shape.getxPos(), shape.getyPos(), shape.getSize(),
+                    shape.getSize());
+        }
+    }
 
-		array[0] = x;
-		array[1] = y;
-		return array;
-	}
+    public void renderBackground() {
+        Gdx.gl.glLineWidth(1F);
+        shapeRend.setColor(0, 0, 0, 0);
+        for (int i = 0; i < Constants.WORLD_SIZE; i += 10) {
+            shapeRend.line(0, i, Constants.WORLD_SIZE, i);
+            shapeRend.line(i, 0, i, Constants.WORLD_SIZE);
+        }
+    }
 
-	public void renderPlayer() {
-		shapeRend.set(ShapeType.Filled);
-		shapeRend.setColor(0, 1, 0, 1);
-		shapeRend.rect(cam.position.x, cam.position.y, player.getSize(),
-				player.getSize());
-	}
+    /**
+     * 
+     * Handles the input.
+     * 
+     * Gets the hypotenuse of the mouse direction compared to where the player
+     * is located on the screen (the middle) and then scales it down to a
+     * triangle with a max hypotenuse of 1 (speed) which also gives the x and y
+     * values that the player can move.
+     * 
+     */
+    public void handleInput() {
+        float xy[] = getHypotenuse(true);
 
-	public void renderShapes() {
-		for (Shape shape : shapes) {
-			shapeRend.rect(shape.getxPos(), shape.getyPos(), shape.getSize(),
-					shape.getSize());
-		}
-	}
+        float x = xy[0];
+        float y = xy[1];
 
-	public void renderBackground() {
-		Gdx.gl.glLineWidth(1F);
-		shapeRend.setColor(0, 0, 0, 0);
-		for (int i = 0; i < Constants.WORLD_SIZE; i += 10) {
-			shapeRend.line(0, i, Constants.WORLD_SIZE, i);
-			shapeRend.line(i, 0, i, Constants.WORLD_SIZE);
-		}
-	}
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            player.setSize(player.getSize() + 0.1F);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            player.setSize(player.getSize() - 0.1F);
+        }
+        if (Gdx.input.isTouched()) {
+            if (animateSword == false) {
+                animateSword = true;
+                swordAnimationSteps = 0;
+            }
+        }
 
-	/**
-	 * 
-	 * Handles the input.
-	 * 
-	 * Gets the hypotenuse of the mouse direction compared to where the player
-	 * is located on the screen (the middle) and then scales it down to a
-	 * triangle with a max hypotenuse of 1 (speed) which also gives the x and y
-	 * values that the player can move.
-	 * 
-	 */
-	public void handleInput() {
-		float xy[] = getHypotenuse(true);
+        // if(y < 100 && y > -100) {
+        //
+        // } else {
+        //
+        // }
 
-		float x = xy[0];
-		float y = xy[1];
+        cam.translate(x, y);
 
-		if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-			player.setSize(player.getSize() + 0.1F);
-		}
-		if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-			player.setSize(player.getSize() - 0.1F);
-		}
-		if (Gdx.input.isTouched()) {
-			if (animateSword == false) {
-				animateSword = true;
-				swordAnimationSteps = 0;
-			}
-		}
+        cam.zoom = MathUtils.clamp(cam.zoom, 0.1f,
+                Constants.WORLD_SIZE / cam.viewportWidth);
 
-		// if(y < 100 && y > -100) {
-		//
-		// } else {
-		//
-		// }
+        float effectiveViewportWidth = cam.viewportWidth * cam.zoom;
+        float effectiveViewportHeight = cam.viewportHeight * cam.zoom;
 
-		cam.translate(x, y);
+        cam.position.x = MathUtils.clamp(cam.position.x,
+                effectiveViewportWidth / 2f,
+                Constants.WORLD_SIZE - effectiveViewportWidth / 2f);
+        cam.position.y = MathUtils.clamp(cam.position.y,
+                effectiveViewportHeight / 2f,
+                Constants.WORLD_SIZE - effectiveViewportHeight / 2f);
 
-		cam.zoom = MathUtils.clamp(cam.zoom, 0.1f,
-				Constants.WORLD_SIZE / cam.viewportWidth);
+        player.setX(cam.position.x);
+        player.setY(cam.position.y);
+    }
 
-		float effectiveViewportWidth = cam.viewportWidth * cam.zoom;
-		float effectiveViewportHeight = cam.viewportHeight * cam.zoom;
+    public void swordAnimation() {
+        if (swordAnimationSteps > Constants.SWORD_STEPS_MAX) {
+            swordAnimationSteps = 0;
+            animateSword = false;
+        } else {
+            swordAnimationSteps++;
+            swordCollision();
+        }
+    }
 
-		cam.position.x = MathUtils.clamp(cam.position.x,
-				effectiveViewportWidth / 2f,
-				Constants.WORLD_SIZE - effectiveViewportWidth / 2f);
-		cam.position.y = MathUtils.clamp(cam.position.y,
-				effectiveViewportHeight / 2f,
-				Constants.WORLD_SIZE - effectiveViewportHeight / 2f);
+    public void swordCollision() {
+        Rectangle swordRect = new Rectangle(swordX, swordY, 15F, 15F);
+        Rectangle rect = new Rectangle();
+        for (Shape shape : shapes) {
+            rect.x = shape.getxPos();
+            rect.y = shape.getyPos();
+            rect.width = shape.getSize();
+            rect.height = shape.getSize();
 
-		player.setX(cam.position.x);
-		player.setY(cam.position.y);
-	}
+            if (swordRect.overlaps(rect)) {
+                shape.setDead();
+            }
+        }
+    }
 
-	public void swordAnimation() {
-		if (swordAnimationSteps > Constants.SWORD_STEPS_MAX) {
-			swordAnimationSteps = 0;
-			animateSword = false;
-		} else {
-			swordAnimationSteps++;
-			swordCollision();
-		}
-	}
+    @Override
+    public void resize(int width, int height) {
+        cam.viewportWidth = player.getCameraSize() * (player.getSize() / 10);
+        cam.viewportHeight = player.getCameraSize() * height / width
+                * (player.getSize() / 10);
+        cam.update();
+    }
 
-	public void swordCollision() {
-		Rectangle swordRect = new Rectangle(swordX, swordY, 15F, 15F);
-		Rectangle rect = new Rectangle();
-		for (Shape shape : shapes) {
-			rect.x = shape.getxPos();
-			rect.y = shape.getyPos();
-			rect.width = shape.getSize();
-			rect.height = shape.getSize();
+    @Override
+    public void resume() {
 
-			if (swordRect.overlaps(rect)) {
-				shape.setDead();
-			}
-		}
-	}
+    }
 
-	@Override
-	public void resize(int width, int height) {
-		cam.viewportWidth = player.getCameraSize() * (player.getSize() / 10);
-		cam.viewportHeight = player.getCameraSize() * height / width
-				* (player.getSize() / 10);
-		cam.update();
-	}
+    @Override
+    public void dispose() {
+        batch.dispose();
+    }
 
-	@Override
-	public void resume() {
+    @Override
+    public void pause() {
 
-	}
-
-	@Override
-	public void dispose() {
-		batch.dispose();
-	}
-
-	@Override
-	public void pause() {
-
-	}
+    }
 
 }
