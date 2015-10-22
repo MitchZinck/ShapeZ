@@ -12,7 +12,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.mzinck.shapez.shapes.Shape;
@@ -192,7 +191,7 @@ public class MainScreen extends ApplicationAdapter {
 		//
 		// }
 
-		cam.translate((float) x, (float) y);
+		cam.translate(x, y);
 
 		cam.zoom = MathUtils.clamp(cam.zoom, 0.1f,
 				Constants.WORLD_SIZE / cam.viewportWidth);
