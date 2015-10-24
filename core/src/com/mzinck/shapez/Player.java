@@ -1,26 +1,44 @@
 package com.mzinck.shapez;
 
+import com.badlogic.gdx.math.Rectangle;
+
 public class Player {
 
     private int    speed;
-    private double x;
-    private double y;
+    private int    hp = 10;
+    private float x = 0;
+    private float y = 0;
     private float  cameraSize = 300F;
     private float  size;
+    private Rectangle rect;
 
     private static final int MAX_VELOCITY = 1;
 
     public Player(int speed, float size) {
+        rect = new Rectangle(x, y, size, size);
         this.speed = speed;
         this.size = size;
     }
 
-    private void update() {
-
+    public void update() {
+        rect.x = x;
+        rect.y = y;
+    }
+    
+    public Rectangle getRectangle() {
+        return rect;
+    }
+    
+    public void gotHit() {
+        hp--;
     }
 
     public float getSize() {
         return size;
+    }
+    
+    public int getHP() {
+        return hp;
     }
 
     public void setSize(float size) {
@@ -47,7 +65,7 @@ public class Player {
         return x;
     }
 
-    public void setX(double x) {
+    public void setX(float x) {
         this.x = x;
     }
 
@@ -55,7 +73,7 @@ public class Player {
         return y;
     }
 
-    public void setY(double y) {
+    public void setY(float y) {
         this.y = y;
     }
 

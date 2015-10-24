@@ -7,5 +7,6 @@ public class Constants {
     public static final int   SWORD_STEPS_MAX    = 22;
     public static final float PLAYER_START_SIZE  = 10;
     public static final float SHAPE_START_SIZE   = 10;
+    public static final int   ZOMBIES_PER_LEVEL_MODIFIER = 100;
 
 }
