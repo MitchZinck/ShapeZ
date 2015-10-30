@@ -46,7 +46,6 @@ public class Shape {
 
             xPos += x;
             yPos += y;
-            System.out.println(lastAttack);
             lastAttack = lastAttack > 0 ? lastAttack - 1 : 0;
         }
     }

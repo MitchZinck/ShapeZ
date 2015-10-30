@@ -4,12 +4,12 @@ import java.util.ArrayList;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -30,6 +30,7 @@ public class MainScreen extends ApplicationAdapter {
     private ShapeRenderer      shapeRend;
     private BitmapFont         font;
     private SpriteBatch        batch;
+    private Sprite             map; 
     private OrthographicCamera cam;
     private Player             player; //The player
     private ArrayList<Shape>   shapes; //List of Enemies in the game
@@ -60,6 +61,10 @@ public class MainScreen extends ApplicationAdapter {
                 player.getCameraSize() * (h / w));
         cam.position.set(cam.viewportWidth / 2f, cam.viewportHeight / 2f, 0);
         cam.update();
+        
+        map = new Sprite(new Texture(Gdx.files.internal("camera.png")));
+        map.setPosition(0 + (cam.viewportWidth * cam.zoom / 2F), 0 + (cam.viewportHeight * cam.zoom / 2F));
+        map.setSize(Constants.WORLD_SIZE - cam.viewportWidth + 10F, Constants.WORLD_SIZE - cam.viewportHeight + 10F);
 
         batch = new SpriteBatch();
 
@@ -91,8 +96,12 @@ public class MainScreen extends ApplicationAdapter {
         batch.setProjectionMatrix(cam.combined);
 
         Gdx.gl.glClearColor(1, 1, 1, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);        
 
+        batch.begin();
+        map.draw(batch);
+        batch.end();
+        
         shapeRend.setProjectionMatrix(cam.combined);
         shapeRend.begin(ShapeType.Line);
         shapeRend.setAutoShapeType(true);
@@ -100,7 +109,7 @@ public class MainScreen extends ApplicationAdapter {
         renderPlayer();
         renderShapes();
         shapeRend.end();
-
+        
         batch.begin();
         drawSword();
         font.draw(batch, "HP: " + player.getHP(), cam.position.x - 140, cam.position.y + 80);
@@ -168,7 +177,7 @@ public class MainScreen extends ApplicationAdapter {
         } else if(totalShapes < level * 10){
             if(MathUtils.random(10000) < level * Constants.ZOMBIES_PER_LEVEL_MODIFIER) {
                 shapes.add(new Shape(ShapeDefs.ZOMBIE, player,
-                        MathUtils.random(500), MathUtils.random(500),
+                        MathUtils.random(2000) + 300, MathUtils.random(2000 + 300),
                         MathUtils.random(0.3F, 0.7F), Constants.SHAPE_START_SIZE));
                 totalShapes++;
             }
@@ -207,12 +216,6 @@ public class MainScreen extends ApplicationAdapter {
         float x = xy[0];
         float y = xy[1];
 
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            player.setSize(player.getSize() + 0.1F);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            player.setSize(player.getSize() - 0.1F);
-        }
         if (Gdx.input.isTouched()) {
             if (animateSword == false) {
                 leftOrRight = ((Gdx.input.getX() - 826) > 0) ? -1 : 1;
@@ -234,6 +237,7 @@ public class MainScreen extends ApplicationAdapter {
 
         float effectiveViewportWidth = cam.viewportWidth * cam.zoom;
         float effectiveViewportHeight = cam.viewportHeight * cam.zoom;
+        
 
         cam.position.x = MathUtils.clamp(cam.position.x,
                 effectiveViewportWidth / 2f,
