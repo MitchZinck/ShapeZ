@@ -59,7 +59,7 @@ task run(type: Exec) {
     }
 
     def adb = path + "/platform-tools/adb"
-    commandLine "$adb", 'shell', 'am', 'start', '-n', 'com.mzinck.bloque.android/com.mzinck.bloque.android.AndroidLauncher'
+    commandLine "$adb", 'shell', 'am', 'start', '-n', 'com.mzinck.shapez.android/com.mzinck.shapez.android.AndroidLauncher'
 }
 
 // sets up the Android Eclipse project, using the old Ant based build.
