@@ -1,26 +1,39 @@
 package com.mzinck.shapez;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
+import com.mzinck.shapez.power.Power;
 
 public class Player {
 
-    private int              speed;
-    private int              hp           = 10;
-    private int              points       = 100000;
-    private float            x            = 0;
-    private float            y            = 0;
-    private float            cameraSize   = 300F;
-    private float            size;
-    private Sword            sword;
-    private Rectangle        rect;
-
-    private static final int MAX_VELOCITY = 1;
+    private int                speed;
+    private int                hp         = 10;
+    private int                points     = 0;
+    private float              x          = 0;
+    private float              y          = 0;
+    private float              cameraSize = 300F;
+    private float              size;
+    private Sword              sword;
+    private Rectangle          rect;
+    private Map<Power, Sprite> powers;
 
     public Player(int speed, float size, Sword sword) {
         rect = new Rectangle(x, y, size, size);
         this.speed = speed;
         this.size = size;
         this.sword = sword;
+        powers = new LinkedHashMap<Power, Sprite>();
+    }
+    
+    public void addPower(Power power, Sprite sprite) {
+        powers.put(power, sprite);
+    }
+    
+    public Map<Power, Sprite> getPowers() {
+        return powers;
     }
 
     public void update() {

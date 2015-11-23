@@ -4,44 +4,51 @@ size: 1024,1024
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-sword1
+fire
+  rotate: false
+  xy: 2, 179
+  size: 210, 299
+  orig: 210, 299
+  offset: 0, 0
+  index: -1
+nuke
   rotate: false
   xy: 2, 2
+  size: 180, 175
+  orig: 180, 175
+  offset: 0, 0
+  index: -1
+sword1
+  rotate: false
+  xy: 578, 480
   size: 150, 512
   orig: 150, 512
   offset: 0, 0
   index: -1
 sword2
   rotate: false
-  xy: 154, 2
-  size: 150, 512
-  orig: 150, 512
+  xy: 2, 480
+  size: 190, 512
+  orig: 190, 512
   offset: 0, 0
   index: -1
 sword3
   rotate: false
-  xy: 306, 2
-  size: 150, 512
-  orig: 150, 512
+  xy: 194, 480
+  size: 190, 512
+  orig: 190, 512
   offset: 0, 0
   index: -1
 sword4
   rotate: false
-  xy: 458, 2
-  size: 150, 512
-  orig: 150, 512
+  xy: 386, 480
+  size: 190, 512
+  orig: 190, 512
   offset: 0, 0
   index: -1
 sword5
   rotate: false
-  xy: 610, 2
-  size: 150, 512
-  orig: 150, 512
-  offset: 0, 0
-  index: -1
-sword6
-  rotate: false
-  xy: 762, 2
+  xy: 730, 480
   size: 150, 512
   orig: 150, 512
   offset: 0, 0
@@ -54,28 +61,35 @@ filter: Nearest,Nearest
 repeat: none
 sword10
   rotate: false
-  xy: 458, 2
+  xy: 610, 2
   size: 150, 512
   orig: 150, 512
   offset: 0, 0
   index: -1
-sword7
+sword6
   rotate: false
   xy: 2, 2
   size: 150, 512
   orig: 150, 512
   offset: 0, 0
   index: -1
-sword8
+sword7
   rotate: false
   xy: 154, 2
   size: 150, 512
   orig: 150, 512
   offset: 0, 0
   index: -1
-sword9
+sword8
   rotate: false
   xy: 306, 2
+  size: 150, 512
+  orig: 150, 512
+  offset: 0, 0
+  index: -1
+sword9
+  rotate: false
+  xy: 458, 2
   size: 150, 512
   orig: 150, 512
   offset: 0, 0

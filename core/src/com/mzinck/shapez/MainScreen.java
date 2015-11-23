@@ -1,9 +1,14 @@
 package com.mzinck.shapez;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -13,13 +18,14 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
+import com.mzinck.shapez.power.Power;
 import com.mzinck.shapez.shapes.Shape;
 import com.mzinck.shapez.shapes.ShapeDefs;
 import com.mzinck.shapez.shapes.ShapeFactory;
@@ -36,11 +42,17 @@ public class MainScreen extends ApplicationAdapter {
     private BitmapFont          font;
     private SpriteBatch         batch;
     private Sprite              map, box;
-    private Rectangle           boxRect;
+    private Rectangle           boxRect,
+                                powerButtons;
+    private Polygon             polyOne,
+                                polyTwo;
     private OrthographicCamera  cam;
     private Player              player;
-    private ArrayList<Shape>    shapes;
     private Sprite[]            swords;
+    private Map<Power, Sprite>  droppedPowers;
+    private Sprite              firePower;
+    private float[]             fireArray;
+    private ArrayList<Shape>    shapes;
     private TextureAtlas        atlas;
     private Vector3             coords;
     private ShapeFactory<Shape> shapeFactory;
@@ -60,6 +72,8 @@ public class MainScreen extends ApplicationAdapter {
     public void create() {
         SCALE_RATIO = 150 / Gdx.graphics.getWidth();
         shapeFactory = Shape::new;
+        polyTwo = new Polygon();
+        polyOne = new Polygon();         
         
         atlas = new TextureAtlas(Gdx.files.internal("pack.atlas"));
         swords = new Sprite[10];
@@ -71,6 +85,8 @@ public class MainScreen extends ApplicationAdapter {
                 Constants.PLAYER_START_SIZE, Sword.ONE);
 
         shapes = new ArrayList<Shape>();
+        droppedPowers = new HashMap<Power, Sprite>();
+        firePower = null;
 
         float w = Gdx.graphics.getWidth();
         float h = Gdx.graphics.getHeight();
@@ -83,6 +99,8 @@ public class MainScreen extends ApplicationAdapter {
         box.setPosition(300, 300);
         box.setSize(100F, 100F);
         boxRect = new Rectangle(box.getX(), box.getY(), 100F, 100F);
+        
+        powerButtons = new Rectangle();
         
 //        map = new Sprite(new Texture(Gdx.files.internal("camera.png")));
 //        map.setPosition(0 + (cam.viewportWidth * cam.zoom / 2F), 0 + (cam.viewportHeight * cam.zoom / 2F));
@@ -100,7 +118,8 @@ public class MainScreen extends ApplicationAdapter {
     public void render() {        
         spawnShapes();
         handleInput();
-        player.update();
+        player.update(); 
+        updateFire();      
         if(player.getHP() < 1) {
            newLevel();
            level = 1;
@@ -136,6 +155,17 @@ public class MainScreen extends ApplicationAdapter {
         shapeRend.end();
         
         batch.begin();
+        for(Sprite sprite : droppedPowers.values()) {
+            batch.draw(sprite, sprite.getX(), sprite.getY(), sprite.getRegionWidth() * 0.05F, sprite.getRegionHeight() * 0.05F);
+        }
+        int count = 0;
+        for(Sprite sprite : player.getPowers().values()) {           
+            batch.draw(sprite, cam.position.x - 32.5F + count * 15, cam.position.y - 65F, 10F, 10F);
+            count++;
+        }
+        if(firePower != null) {
+            batch.draw(firePower, firePower.getX(), firePower.getY(), firePower.getRegionWidth() * 0.35F, firePower.getRegionHeight() * 0.35F);
+        }
         drawSword();
         font.draw(batch, "HP: " + player.getHP(), cam.position.x - 140, cam.position.y + 80);
         font.draw(batch, "Level: " + level, cam.position.x - 140, cam.position.y + 70);
@@ -149,13 +179,13 @@ public class MainScreen extends ApplicationAdapter {
         }
         if(swordCount != 0) {
             swordCount--;
-        }
+        } 
     }
     
     public void drawSword() {
         float array[] = getHypotenuse(false);
-        swordX = array[0] + cam.position.x - 512 * player.getSword().getScaleSize() / 2;
-        swordY = array[1] + cam.position.y - 512 * player.getSword().getScaleSize() / 2;             
+        swordX = array[0] + cam.position.x - 128 * player.getSword().getScaleSize() / 2;
+        swordY = array[1] + cam.position.y;             
 
         batch.draw(swords[player.getSword().getIndex()].getTexture(), swordX, swordY, player.getSize() / 2, 0,
                 swords[player.getSword().getIndex()].getRegionWidth(), swords[player.getSword().getIndex()].getRegionHeight(), 
@@ -199,6 +229,12 @@ public class MainScreen extends ApplicationAdapter {
         for (Shape shape : shapes) {
             shapeRend.rect(shape.getxPos(), shape.getyPos(), shape.getSize(),
                     shape.getSize());
+        } 
+        
+        shapeRend.set(ShapeType.Line);
+        shapeRend.setColor(Color.BLACK);      
+        for(int i = 0; i < 4; i++) {
+            shapeRend.circle(cam.position.x - 32.5F + i * 25, cam.position.y - 60F, 10F, 30);
         }
     }
     
@@ -234,6 +270,58 @@ public class MainScreen extends ApplicationAdapter {
             shapeRend.line(i, 0, i, Constants.WORLD_SIZE);
         }
     }
+    
+    public void doPower(String name) {
+        switch(name) {
+            case "FIRE":
+                firePower = createScaledSprite(atlas.createSprite(Power.FIRE.toString().toLowerCase()));
+                firePower.setPosition(cam.position.x, cam.position.y);
+                fireArray = getHypotenuse(false);
+                break;
+                
+            case "NUKE":
+                break;
+        }
+    }
+    
+    public void updateFire() {
+        if(firePower == null) {
+            return;
+        }
+        
+        polyOne.setVertices(new float[] {
+                firePower.getX(), firePower.getY(),
+                firePower.getX(), firePower.getY() + firePower.getRegionHeight() * 0.35F,
+                firePower.getX() + firePower.getRegionWidth() * 0.35F, firePower.getY() + firePower.getRegionHeight() * 0.35F,
+                firePower.getX() + firePower.getRegionWidth() * 0.35F, firePower.getY()
+            });
+        
+        polyOne.setOrigin(firePower.getX(), firePower.getY());
+        
+        for (Shape shape : shapes) {
+            if(!shape.isDead()) {  
+                polyTwo.setVertices(new float[] {
+                        shape.getxPos(), shape.getyPos(),
+                        shape.getxPos(), shape.getyPos() + shape.getSize(),
+                        shape.getxPos() + shape.getSize(), shape.getyPos() + shape.getSize(),
+                        shape.getxPos() + shape.getSize(), shape.getyPos()
+                });
+                
+                if (Intersector.overlapConvexPolygons(polyOne, polyTwo)) {
+                    shape.setDead();
+                    deadShapes++;
+                    player.setPoints(player.getPoints() + 25);
+                }
+            }
+        }
+        if(firePower.getX() > 600 || firePower.getX() < - 200 || firePower.getY() > 600 || firePower.getY() < -200) {
+            firePower = null;
+            player.getPowers().remove(Power.FIRE);
+        } else {
+            firePower.setX(firePower.getX() + fireArray[0]);
+            firePower.setY(firePower.getY() + fireArray[1]);
+        }
+    }
 
     /**
      * 
@@ -263,6 +351,27 @@ public class MainScreen extends ApplicationAdapter {
             if(boxRect.contains(coords.x, coords.y)) {
                 touchedBox();
             }
+            
+            for(int i = 0; i < player.getPowers().size(); i++) {
+                powerButtons.setX(cam.position.x - 32.5F + i * 25);
+                powerButtons.setX(cam.position.y - 60F);
+                powerButtons.setSize(20F);
+                if(powerButtons.contains(coords.x, coords.y)) {
+                    int c = 0;
+                    for(Power p : player.getPowers().keySet()) {
+                        if(c == i) {
+                            doPower(p.toString());
+                            break;
+                        }
+                        c++;
+                    }
+                }
+            }
+        }
+        
+        if(Gdx.input.isKeyPressed(Input.Keys.B) && player.getPowers().containsKey(Power.FIRE)) {
+            doPower(Power.FIRE.toString());
+            player.getPowers().remove(Power.FIRE);
         }
 
         // if(y < 100 && y > -100) {
@@ -320,8 +429,6 @@ public class MainScreen extends ApplicationAdapter {
             
             int rand = MathUtils.random(100);
             for(Sword s : Sword.values()) {
-                System.out.println(rand);
-                System.out.println(s.getRarity());
                 if(rand >= s.getRarity()) {
                     continue;
                 } else {
@@ -340,22 +447,63 @@ public class MainScreen extends ApplicationAdapter {
     }
 
     public void swordCollision() {
-        Rectangle swordRect = new Rectangle(swordX, swordY, 15F, 15F);
-        Rectangle rect = new Rectangle();
+        polyOne.setVertices(new float[] {
+            swordX, swordY,
+            swordX, swordY + 512 * player.getSword().getScaleSize(),
+            swordX + 128 * player.getSword().getScaleSize(), swordY + 512 * player.getSword().getScaleSize(),
+            swordX + 128 * player.getSword().getScaleSize(), swordY
+        });
+        polyOne.setOrigin(swordX, swordY);
+        polyOne.setRotation(swordAnimationSteps * leftOrRight * 15);
         for (Shape shape : shapes) {
             if(!shape.isDead()) {
-                rect.x = shape.getxPos();
-                rect.y = shape.getyPos();
-                rect.width = shape.getSize();
-                rect.height = shape.getSize();
+                
+                polyTwo.setVertices(new float[] {
+                        shape.getxPos(), shape.getyPos(),
+                        shape.getxPos(), shape.getyPos() + shape.getSize(),
+                        shape.getxPos() + shape.getSize(), shape.getyPos() + shape.getSize(),
+                        shape.getxPos() + shape.getSize(), shape.getyPos()
+                });
     
-                if (swordRect.overlaps(rect)) {
+                if (Intersector.overlapConvexPolygons(polyOne, polyTwo)) {
                     shape.setDead();
                     deadShapes++;
-                    player.setPoints(player.getPoints() + 75);
+                    player.setPoints(player.getPoints() + 25);
+                    int r = MathUtils.random(2000);
+                    if(r < 2000) {
+                        int power = MathUtils.random(0, 3);
+                        if(power == 0 && !droppedPowers.containsKey(Power.FIRE)) {
+                            Sprite s = createScaledSprite(atlas.createSprite(Power.FIRE.toString().toLowerCase()));
+                            s.setPosition(shape.getxPos(), shape.getyPos());
+                            droppedPowers.put(Power.FIRE, s);
+                        } else if(power == 1 && !droppedPowers.containsKey(Power.NUKE)) {
+                            Sprite s = createScaledSprite(atlas.createSprite(Power.NUKE.toString().toLowerCase()));
+                            s.setPosition(shape.getxPos(), shape.getyPos());
+                            droppedPowers.put(Power.NUKE, s);
+                        }
+                    }
                 }
             }
         }
+        
+        Iterator entries = droppedPowers.entrySet().iterator();
+        
+        while(entries.hasNext()) {
+            Entry entry = (Entry) entries.next();
+            Sprite s = (Sprite) entry.getValue();
+            polyTwo.setVertices(new float[] {
+                    s.getX(), s.getY(),
+                    s.getX(), s.getY() + 10F,
+                    s.getX() + 10F, s.getY() + 10F,
+                    s.getX() + 10F, s.getY()
+            });
+            
+            if(Intersector.overlapConvexPolygons(polyOne, polyTwo)) {
+                entries.remove();
+                player.addPower((Power) entry.getKey(), s);
+            }
+        }
+
     }
 
     @Override
