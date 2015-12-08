@@ -37,6 +37,41 @@ import com.mzinck.shapez.shapes.ShapeFactory;
  *
  */
 public class MainScreen extends ApplicationAdapter {
+    
+    
+//    TO-DO
+//
+//    ===SOUNDS===
+//    SwordSound
+//    LevelSound
+//    ZombieSound * 5
+//    ButtonSound
+//    NukeSound
+//    SwordUpgradeSound
+//    HealSound
+//    FireballSound
+//    DeathSound
+//
+//    ===VISUAL===
+//    ---Game---
+//    Character
+//    Zombie - (rotate to face character)
+//    Map
+//    Mystery Box - Open - Close
+//    Move Button (left side)
+//    Swing Button (right side with CD indicator)
+//    Ride side 4 power buttons
+//    ---UI---
+//    Load game Fades in
+//    Tutorial (Information and some camera shots)
+//    Pause
+//    Play
+//    Ads
+//
+
+
+
+    
 
     private ShapeRenderer       shapeRend;
     private BitmapFont          font;
@@ -48,8 +83,8 @@ public class MainScreen extends ApplicationAdapter {
                                 polyTwo;
     private OrthographicCamera  cam;
     private Player              player;
-    private Sprite[]            swords;
-    private Map<Power, Sprite>  droppedPowers;
+    private Sprite[]            swords,
+                                players;
     private Sprite              firePower;
     private float[]             fireArray;
     private ArrayList<Shape>    shapes;
@@ -70,22 +105,25 @@ public class MainScreen extends ApplicationAdapter {
 
     @Override
     public void create() {
-        SCALE_RATIO = 150 / Gdx.graphics.getWidth();
+        SCALE_RATIO = 15 / Gdx.graphics.getWidth();
         shapeFactory = Shape::new;
         polyTwo = new Polygon();
-        polyOne = new Polygon();         
+        polyOne = new Polygon();    
         
         atlas = new TextureAtlas(Gdx.files.internal("pack.atlas"));
         swords = new Sprite[10];
-        for(int i = 1; i <=10; i++) {
+        for(int i = 1; i <= 10; i++) {
             swords[i - 1] = createScaledSprite(atlas.createSprite("sword" + i));
         }
+        players = new Sprite[1];
+        for(int i = 1; i <= players.length; i++) {
+            players[i - 1] = createScaledSprite(atlas.createSprite("player" + i));
+        }           
 
         player = new Player(Constants.PLAYER_START_SPEED,
-                Constants.PLAYER_START_SIZE, Sword.ONE);
+                Constants.PLAYER_START_SIZE, Sword.ONE, players[0]);
 
         shapes = new ArrayList<Shape>();
-        droppedPowers = new HashMap<Power, Sprite>();
         firePower = null;
 
         float w = Gdx.graphics.getWidth();
@@ -123,7 +161,7 @@ public class MainScreen extends ApplicationAdapter {
         if(player.getHP() < 1) {
            newLevel();
            level = 1;
-           player = new Player(Constants.PLAYER_START_SPEED, Constants.PLAYER_START_SIZE, Sword.ONE);
+           player = new Player(Constants.PLAYER_START_SPEED, Constants.PLAYER_START_SIZE, Sword.ONE, players[0]);
         }
         if (animateSword == true) {
             swordAnimation();
@@ -150,14 +188,11 @@ public class MainScreen extends ApplicationAdapter {
         shapeRend.begin(ShapeType.Line);
         shapeRend.setAutoShapeType(true);
         renderBackground();
-        renderPlayer();
         renderShapes();
         shapeRend.end();
         
         batch.begin();
-        for(Sprite sprite : droppedPowers.values()) {
-            batch.draw(sprite, sprite.getX(), sprite.getY(), sprite.getRegionWidth() * 0.05F, sprite.getRegionHeight() * 0.05F);
-        }
+        batch.draw(player.getSprite(), cam.position.x, cam.position.y, player.getSprite().getRegionWidth() * Constants.PLAYER_SCALE_VALUE, player.getSprite().getRegionHeight() * Constants.PLAYER_SCALE_VALUE);
         int count = 0;
         for(Sprite sprite : player.getPowers().values()) {           
             batch.draw(sprite, cam.position.x - 32.5F + count * 15, cam.position.y - 65F, 10F, 10F);
@@ -185,7 +220,7 @@ public class MainScreen extends ApplicationAdapter {
     public void drawSword() {
         float array[] = getHypotenuse(false);
         swordX = array[0] + cam.position.x - 128 * player.getSword().getScaleSize() / 2;
-        swordY = array[1] + cam.position.y;             
+        swordY = array[1] + cam.position.y + 10;             
 
         batch.draw(swords[player.getSword().getIndex()].getTexture(), swordX, swordY, player.getSize() / 2, 0,
                 swords[player.getSword().getIndex()].getRegionWidth(), swords[player.getSword().getIndex()].getRegionHeight(), 
@@ -203,7 +238,7 @@ public class MainScreen extends ApplicationAdapter {
 
         float scaleValue = (playerHyp == true)
                 ? (float) (player.getSpeed() / hypotenuse)
-                : (float) (10 / hypotenuse);
+                : (float) (Constants.PLAYER_START_SIZE / 1.5 / hypotenuse);
 
         if ((x < 100 && x > -100) && (y < 100 && y > -100) && playerHyp == true) {
             x = x / 100;
@@ -216,13 +251,6 @@ public class MainScreen extends ApplicationAdapter {
         array[0] = x;
         array[1] = y;
         return array;
-    }
-
-    public void renderPlayer() {
-        shapeRend.set(ShapeType.Filled);
-        shapeRend.setColor(0, 1, 0, 1);
-        shapeRend.rect(cam.position.x, cam.position.y, player.getSize(),
-                player.getSize());
     }
 
     public void renderShapes() {
@@ -280,6 +308,25 @@ public class MainScreen extends ApplicationAdapter {
                 break;
                 
             case "NUKE":
+                for(Shape shape : shapes) {
+                    if(!shape.isDead()) {
+                        shape.setDead();
+                        deadShapes++;
+                    }
+                }
+                //doNukeAnim();
+                break;
+                
+            case "HEAL":
+                player.setHP(10);
+                //heal sound 
+                break;
+                
+            case "SWORD_UPGRADE":
+                if(player.getSword() != Sword.TEN) {
+                    player.setSword(Sword.values()[player.getSword().ordinal() - 1]);
+                    System.out.println(Sword.values()[player.getSword().ordinal() - 1]);
+                }
                 break;
         }
     }
@@ -372,7 +419,18 @@ public class MainScreen extends ApplicationAdapter {
         if(Gdx.input.isKeyPressed(Input.Keys.B) && player.getPowers().containsKey(Power.FIRE)) {
             doPower(Power.FIRE.toString());
             player.getPowers().remove(Power.FIRE);
-        }
+        } else if(Gdx.input.isKeyPressed(Input.Keys.V) && player.getPowers().containsKey(Power.NUKE)) {
+            doPower(Power.NUKE.toString());
+            player.getPowers().remove(Power.NUKE);
+        } else if(Gdx.input.isKeyPressed(Input.Keys.N) && player.getPowers().containsKey(Power.HEAL)) {
+            doPower(Power.HEAL.toString());
+            player.getPowers().remove(Power.HEAL);
+        } else if(Gdx.input.isKeyPressed(Input.Keys.M) && player.getPowers().containsKey(Power.SWORD_UPGRADE)) {
+            doPower(Power.SWORD_UPGRADE.toString());
+            player.getPowers().remove(Power.SWORD_UPGRADE);
+        } 
+
+
 
         // if(y < 100 && y > -100) {
         //
@@ -470,46 +528,31 @@ public class MainScreen extends ApplicationAdapter {
                     deadShapes++;
                     player.setPoints(player.getPoints() + 25);
                     int r = MathUtils.random(2000);
-                    if(r < 2000) {
+                    if(r < 2) {
                         int power = MathUtils.random(0, 3);
-                        if(power == 0 && !droppedPowers.containsKey(Power.FIRE)) {
+                        if(power == 0 && !player.getPowers().containsKey(Power.FIRE)) {
                             Sprite s = createScaledSprite(atlas.createSprite(Power.FIRE.toString().toLowerCase()));
-                            s.setPosition(shape.getxPos(), shape.getyPos());
-                            droppedPowers.put(Power.FIRE, s);
-                        } else if(power == 1 && !droppedPowers.containsKey(Power.NUKE)) {
+                            player.addPower(Power.FIRE, s);
+                        } else if(power == 1 && !player.getPowers().containsKey(Power.NUKE)) {
                             Sprite s = createScaledSprite(atlas.createSprite(Power.NUKE.toString().toLowerCase()));
-                            s.setPosition(shape.getxPos(), shape.getyPos());
-                            droppedPowers.put(Power.NUKE, s);
+                            player.addPower(Power.NUKE, s);
+                        } else if(power == 2 && !player.getPowers().containsKey(Power.HEAL)) {
+                            Sprite s = createScaledSprite(atlas.createSprite(Power.HEAL.toString().toLowerCase()));
+                            player.addPower(Power.HEAL, s);
+                        } else if(power == 3 && !player.getPowers().containsKey(Power.SWORD_UPGRADE)) {
+                            Sprite s = createScaledSprite(atlas.createSprite(Power.SWORD_UPGRADE.toString().toLowerCase()));
+                            player.addPower(Power.SWORD_UPGRADE, s);
                         }
                     }
                 }
             }
         }
-        
-        Iterator entries = droppedPowers.entrySet().iterator();
-        
-        while(entries.hasNext()) {
-            Entry entry = (Entry) entries.next();
-            Sprite s = (Sprite) entry.getValue();
-            polyTwo.setVertices(new float[] {
-                    s.getX(), s.getY(),
-                    s.getX(), s.getY() + 10F,
-                    s.getX() + 10F, s.getY() + 10F,
-                    s.getX() + 10F, s.getY()
-            });
-            
-            if(Intersector.overlapConvexPolygons(polyOne, polyTwo)) {
-                entries.remove();
-                player.addPower((Power) entry.getKey(), s);
-            }
-        }
-
     }
 
     @Override
     public void resize(int width, int height) {
-        cam.viewportWidth = player.getCameraSize() * (player.getSize() / 10);
-        cam.viewportHeight = player.getCameraSize() * height / width * (player.getSize() / 10);
+        cam.viewportWidth = player.getCameraSize();
+        cam.viewportHeight = player.getCameraSize() * height / width;
         cam.update();
     }
 

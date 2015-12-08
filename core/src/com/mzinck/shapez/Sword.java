@@ -2,29 +2,25 @@ package com.mzinck.shapez;
 
 public enum Sword {
 
-    TEN(0, 1, 1, 1, 9, 0.09F),
-    NINE(1, 1, 1, 2, 8, 0.08F),
-    EIGHT(2, 1, 1, 5, 7, 0.075F),
-    SEVEN(3, 1, 1, 10, 6, 0.07F),
-    SIX(4, 1, 1, 20, 5, 0.065F),
-    FIVE(5, 1, 1, 30, 4, 0.06F),
-    FOUR(6, 1, 1, 50, 3, 0.055F),
-    THREE(7, 1, 1, 65, 2, 0.05F),
-    TWO(8, 1, 1, 60, 1, 0.045F),
-    ONE(9, 1, 1, 100, 0, 0.04F);
+    TEN(3, 1, 9, 0.21F),
+    NINE(3, 2, 8, 0.2F),
+    EIGHT(4, 5, 7, 0.195F),
+    SEVEN(4, 10, 6, 0.19F),
+    SIX(4, 20, 5, 0.185F),
+    FIVE(5, 50, 4, 0.18F),
+    FOUR(6, 100, 3, 0.175F),
+    THREE(7, 150, 2, 0.17F),
+    TWO(8, 200, 1, 0.15F),
+    ONE(9, 1000, 0, 0.1F);
     
     private int speed,
-                height,
-                width,
                 rarity,
                 index;
     
     private float scaleSize;
 
-    private Sword(int speed, int height, int width, int rarity, int index, float scaleSize) {
+    private Sword(int speed, int rarity, int index, float scaleSize) {
         this.speed = speed;
-        this.height = height;
-        this.width = width;
         this.rarity = rarity;
         this.index = index;
         this.scaleSize = scaleSize;

@@ -49,7 +49,7 @@ public class Shape {
             lastAttack = lastAttack > 0 ? lastAttack - 1 : 0;
         }
     }
-
+   
     public void setDead() {
         isDead = true;
     }

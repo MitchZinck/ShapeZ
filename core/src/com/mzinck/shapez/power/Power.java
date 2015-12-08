@@ -3,6 +3,8 @@ package com.mzinck.shapez.power;
 public enum Power {
 
     FIRE,
-    NUKE;
+    NUKE,
+    HEAL,
+    SWORD_UPGRADE;
 
 }

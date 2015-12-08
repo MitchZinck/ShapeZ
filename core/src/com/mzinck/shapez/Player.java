@@ -19,15 +19,29 @@ public class Player {
     private Sword              sword;
     private Rectangle          rect;
     private Map<Power, Sprite> powers;
+    private Sprite             sprite;
 
-    public Player(int speed, float size, Sword sword) {
+    public Player(int speed, float size, Sword sword, Sprite sprite) {
         rect = new Rectangle(x, y, size, size);
         this.speed = speed;
         this.size = size;
         this.sword = sword;
+        this.sprite = sprite;
         powers = new LinkedHashMap<Power, Sprite>();
     }
     
+    public void setHP(int hp) {
+        this.hp = hp;
+    }
+    
+    public Sprite getSprite() {
+        return sprite;
+    }
+    
+    public void setSprite(Sprite sprite) {
+        this.sprite = sprite;
+    }
+        
     public void addPower(Power power, Sprite sprite) {
         powers.put(power, sprite);
     }
