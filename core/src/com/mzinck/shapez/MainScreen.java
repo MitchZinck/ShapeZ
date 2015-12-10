@@ -84,7 +84,8 @@ public class MainScreen extends ApplicationAdapter {
     private OrthographicCamera  cam;
     private Player              player;
     private Sprite[]            swords,
-                                players;
+                                armor,
+                                zombies;
     private Sprite              firePower;
     private float[]             fireArray;
     private ArrayList<Shape>    shapes;
@@ -112,16 +113,21 @@ public class MainScreen extends ApplicationAdapter {
         
         atlas = new TextureAtlas(Gdx.files.internal("pack.atlas"));
         swords = new Sprite[10];
-        for(int i = 1; i <= 10; i++) {
+        for(int i = 1; i <= swords.length; i++) {
             swords[i - 1] = createScaledSprite(atlas.createSprite("sword" + i));
         }
-        players = new Sprite[1];
-        for(int i = 1; i <= players.length; i++) {
-            players[i - 1] = createScaledSprite(atlas.createSprite("player" + i));
-        }           
+        armor = new Sprite[5];
+        for(int i = 1; i <= armor.length; i++) {
+            armor[i - 1] = createScaledSprite(atlas.createSprite("helmet" + i));
+        }    
+        
+        zombies = new Sprite[2];
+        for(int i = 1; i <= zombies.length; i++) {
+            zombies[i - 1] = createScaledSprite(atlas.createSprite("zombie" + i));
+        }
 
         player = new Player(Constants.PLAYER_START_SPEED,
-                Constants.PLAYER_START_SIZE, Sword.ONE, players[0]);
+                Constants.PLAYER_START_SIZE, Sword.ONE, armor[0]);
 
         shapes = new ArrayList<Shape>();
         firePower = null;
@@ -161,7 +167,7 @@ public class MainScreen extends ApplicationAdapter {
         if(player.getHP() < 1) {
            newLevel();
            level = 1;
-           player = new Player(Constants.PLAYER_START_SPEED, Constants.PLAYER_START_SIZE, Sword.ONE, players[0]);
+           player = new Player(Constants.PLAYER_START_SPEED, Constants.PLAYER_START_SIZE, Sword.ONE, armor[0]);
         }
         if (animateSword == true) {
             swordAnimation();
@@ -193,6 +199,7 @@ public class MainScreen extends ApplicationAdapter {
         
         batch.begin();
         batch.draw(player.getSprite(), cam.position.x, cam.position.y, player.getSprite().getRegionWidth() * Constants.PLAYER_SCALE_VALUE, player.getSprite().getRegionHeight() * Constants.PLAYER_SCALE_VALUE);
+        renderZombies();
         int count = 0;
         for(Sprite sprite : player.getPowers().values()) {           
             batch.draw(sprite, cam.position.x - 32.5F + count * 15, cam.position.y - 65F, 10F, 10F);
@@ -254,10 +261,10 @@ public class MainScreen extends ApplicationAdapter {
     }
 
     public void renderShapes() {
-        for (Shape shape : shapes) {
-            shapeRend.rect(shape.getxPos(), shape.getyPos(), shape.getSize(),
-                    shape.getSize());
-        } 
+//        for (Shape shape : shapes) {
+//            shapeRend.rect(shape.getxPos(), shape.getyPos(), shape.getSize(),
+//                    shape.getSize());
+//        } 
         
         shapeRend.set(ShapeType.Line);
         shapeRend.setColor(Color.BLACK);      
@@ -265,7 +272,23 @@ public class MainScreen extends ApplicationAdapter {
             shapeRend.circle(cam.position.x - 32.5F + i * 25, cam.position.y - 60F, 10F, 30);
         }
     }
-    
+   
+    public void renderZombies() { 
+        for(Shape shape : shapes) {
+            if(shape.getAnim() > 0) {
+                batch.draw(zombies[1], shape.getxPos(), shape.getyPos(), zombies[1].getRegionWidth() * Constants.PLAYER_SCALE_VALUE, 
+                        zombies[1].getRegionHeight() * Constants.PLAYER_SCALE_VALUE);
+//                batch.draw(zombies[1].getTexture(), shape.getxPos(), shape.getyPos(), player.getSize() / 2, player.getSize() / 2,
+//                        zombies[1].getRegionWidth(), zombies[1].getRegionHeight(), 
+//                        Constants.PLAYER_SCALE_VALUE, Constants.PLAYER_SCALE_VALUE, swordAnimationSteps * leftOrRight * 15,
+//                        zombies[1].getRegionX(), zombies[1].getRegionY(), 
+//                        zombies[1].getRegionWidth(), zombies[1].getRegionHeight(), false, false);
+            } else {
+                batch.draw(zombies[0], shape.getxPos(), shape.getyPos(), zombies[0].getRegionWidth() * Constants.PLAYER_SCALE_VALUE, 
+                        zombies[0].getRegionHeight() * Constants.PLAYER_SCALE_VALUE);
+            }
+        }
+    }
     
     public void spawnShapes() {
         if(deadShapes >= (level * 10)) {

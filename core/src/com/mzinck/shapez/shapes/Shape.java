@@ -1,5 +1,6 @@
 package com.mzinck.shapez.shapes;
 
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
 import com.mzinck.shapez.Player;
 
@@ -7,13 +8,13 @@ public class Shape {
 
     private ShapeDefs shape;
     private Player    player;
-    private float xPos;
-    private float yPos;
-    private float speed;
-    private float size;
-    private int hp;
-    private int lastAttack = 0;
-    private boolean isDead;
+    private float     xPos;
+    private float     yPos;
+    private float     speed;
+    private float     size;
+    private int       hp;
+    private int       lastAttack = 0, spriteCounter = 0;
+    private boolean   isDead;
     private Rectangle rect;
 
     public Shape(ShapeDefs shape, Player player, float xPos, float yPos, float speed, float size) {
@@ -34,6 +35,7 @@ public class Shape {
             if(rect.overlaps(player.getRectangle()) && lastAttack == 0) {
                 player.gotHit();
                 lastAttack = 60;
+                spriteCounter = 10;
             }
             double x = (player.getX() - xPos);
             double y = (player.getY() - yPos);
@@ -47,9 +49,14 @@ public class Shape {
             xPos += x;
             yPos += y;
             lastAttack = lastAttack > 0 ? lastAttack - 1 : 0;
+            spriteCounter = spriteCounter > 0 ? spriteCounter - 1 : 0;
         }
     }
    
+    public int getAnim() {
+        return spriteCounter;
+    }
+    
     public void setDead() {
         isDead = true;
     }

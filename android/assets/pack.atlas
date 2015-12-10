@@ -6,58 +6,30 @@ filter: Nearest,Nearest
 repeat: none
 fire
   rotate: false
-  xy: 184, 594
+  xy: 740, 102
   size: 210, 299
   orig: 210, 299
   offset: 0, 0
   index: -1
+heal
+  rotate: false
+  xy: 2, 179
+  size: 736, 736
+  orig: 736, 736
+  offset: 0, 0
+  index: -1
 nuke
   rotate: false
-  xy: 2, 718
+  xy: 2, 2
   size: 180, 175
   orig: 180, 175
   offset: 0, 0
   index: -1
-player1
+sword5
   rotate: false
-  xy: 154, 123
-  size: 368, 391
-  orig: 368, 391
-  offset: 0, 0
-  index: -1
-sword1
-  rotate: false
-  xy: 2, 204
-  size: 150, 512
-  orig: 150, 512
-  offset: 0, 0
-  index: -1
-sword2
-  rotate: false
-  xy: 524, 2
-  size: 150, 512
-  orig: 150, 512
-  offset: 0, 0
-  index: -1
-sword3
-  rotate: false
-  xy: 676, 2
-  size: 150, 512
-  orig: 150, 512
-  offset: 0, 0
-  index: -1
-sword4
-  rotate: false
-  xy: 828, 2
-  size: 150, 512
-  orig: 150, 512
-  offset: 0, 0
-  index: -1
-sword_upgrade
-  rotate: false
-  xy: 396, 516
-  size: 611, 377
-  orig: 611, 377
+  xy: 740, 403
+  size: 160, 512
+  orig: 160, 512
   offset: 0, 0
   index: -1
 
@@ -66,18 +38,53 @@ size: 1024,1024
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-heal
+helmet2
   rotate: false
-  xy: 2, 2
-  size: 736, 736
-  orig: 736, 736
+  xy: 615, 516
+  size: 368, 391
+  orig: 368, 391
   offset: 0, 0
   index: -1
-sword5
+player1
   rotate: false
-  xy: 740, 226
+  xy: 164, 137
+  size: 368, 391
+  orig: 368, 391
+  offset: 0, 0
+  index: -1
+sword1
+  rotate: false
+  xy: 696, 2
+  size: 150, 512
+  orig: 150, 512
+  offset: 0, 0
+  index: -1
+sword2
+  rotate: false
+  xy: 848, 2
+  size: 150, 512
+  orig: 150, 512
+  offset: 0, 0
+  index: -1
+sword6
+  rotate: false
+  xy: 2, 16
   size: 160, 512
   orig: 160, 512
+  offset: 0, 0
+  index: -1
+sword7
+  rotate: false
+  xy: 534, 2
+  size: 160, 512
+  orig: 160, 512
+  offset: 0, 0
+  index: -1
+sword_upgrade
+  rotate: false
+  xy: 2, 530
+  size: 611, 377
+  orig: 611, 377
   offset: 0, 0
   index: -1
 
@@ -86,38 +93,86 @@ size: 1024,1024
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-sword10
+helmet1
   rotate: false
-  xy: 630, 2
+  xy: 2, 517
+  size: 358, 391
+  orig: 358, 391
+  offset: 0, 0
+  index: -1
+helmet3
+  rotate: false
+  xy: 2, 123
+  size: 350, 392
+  orig: 350, 392
+  offset: 0, 0
+  index: -1
+helmet4
+  rotate: false
+  xy: 362, 517
+  size: 334, 391
+  orig: 334, 391
+  offset: 0, 0
+  index: -1
+helmet5
+  rotate: false
+  xy: 658, 2
+  size: 346, 392
+  orig: 346, 392
+  offset: 0, 0
+  index: -1
+sword3
+  rotate: false
+  xy: 698, 396
   size: 150, 512
   orig: 150, 512
   offset: 0, 0
   index: -1
-sword6
+sword4
   rotate: false
-  xy: 2, 2
-  size: 160, 512
-  orig: 160, 512
-  offset: 0, 0
-  index: -1
-sword7
-  rotate: false
-  xy: 164, 2
-  size: 160, 512
-  orig: 160, 512
+  xy: 850, 396
+  size: 150, 512
+  orig: 150, 512
   offset: 0, 0
   index: -1
 sword8
   rotate: false
-  xy: 326, 2
+  xy: 354, 3
   size: 150, 512
   orig: 150, 512
   offset: 0, 0
   index: -1
 sword9
   rotate: false
-  xy: 478, 2
+  xy: 506, 3
   size: 150, 512
   orig: 150, 512
+  offset: 0, 0
+  index: -1
+
+pack4.png
+size: 1024,1024
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+sword10
+  rotate: false
+  xy: 361, 290
+  size: 150, 512
+  orig: 150, 512
+  offset: 0, 0
+  index: -1
+zombie1
+  rotate: false
+  xy: 2, 403
+  size: 357, 399
+  orig: 357, 399
+  offset: 0, 0
+  index: -1
+zombie2
+  rotate: false
+  xy: 2, 2
+  size: 357, 399
+  orig: 357, 399
   offset: 0, 0
   index: -1
