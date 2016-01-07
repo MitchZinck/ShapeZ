@@ -11,22 +11,23 @@ public class Player {
 
     private int                speed;
     private int                hp         = 10;
-    private int                points     = 0;
+    private int                points     = 10000;
+    private int 			   armorHP    = 0;
     private float              x          = 0;
     private float              y          = 0;
     private float              cameraSize = 300F;
     private float              size;
     private Sword              sword;
+    private Armor			   armor;
     private Rectangle          rect;
     private Map<Power, Sprite> powers;
-    private Sprite             sprite;
 
-    public Player(int speed, float size, Sword sword, Sprite sprite) {
+    public Player(int speed, float size, Sword sword, Armor armor) {
         rect = new Rectangle(x, y, size, size);
         this.speed = speed;
         this.size = size;
         this.sword = sword;
-        this.sprite = sprite;
+        this.armor = armor;
         powers = new LinkedHashMap<Power, Sprite>();
     }
     
@@ -34,12 +35,12 @@ public class Player {
         this.hp = hp;
     }
     
-    public Sprite getSprite() {
-        return sprite;
+    public int getArmorHP() {
+    	return armorHP;
     }
     
-    public void setSprite(Sprite sprite) {
-        this.sprite = sprite;
+    public void setArmorHP(int hp) {
+    	armorHP = hp;
     }
         
     public void addPower(Power power, Sprite sprite) {
@@ -70,14 +71,26 @@ public class Player {
     public void setSword(Sword sword) {
         this.sword = sword;
     }
+    
+    public Armor getArmor() {
+    	return armor;
+    }
+    
+    public void setArmor(Armor armor) {
+    	this.armor = armor;
+    }
 
     public Rectangle getRectangle() {
         return rect;
     }
 
     public void gotHit() {
-        hp--;
-        points = points > 10 ? points - 10 : 0;
+    	if(armorHP > 0) {
+    		armorHP--;
+    	} else {
+    		hp--;
+    		points = points > 100 ? points - 300 : 0;
+    	}
     }
 
     public float getSize() {

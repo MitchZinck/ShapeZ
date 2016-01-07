@@ -54,8 +54,6 @@ public class MainScreen extends ApplicationAdapter {
 //
 //    ===VISUAL===
 //    ---Game---
-//    Character
-//    Zombie - (rotate to face character)
 //    Map
 //    Mystery Box - Open - Close
 //    Move Button (left side)
@@ -127,7 +125,7 @@ public class MainScreen extends ApplicationAdapter {
         }
 
         player = new Player(Constants.PLAYER_START_SPEED,
-                Constants.PLAYER_START_SIZE, Sword.ONE, armor[0]);
+                Constants.PLAYER_START_SIZE, Sword.ONE, Armor.ONE);
 
         shapes = new ArrayList<Shape>();
         firePower = null;
@@ -167,7 +165,7 @@ public class MainScreen extends ApplicationAdapter {
         if(player.getHP() < 1) {
            newLevel();
            level = 1;
-           player = new Player(Constants.PLAYER_START_SPEED, Constants.PLAYER_START_SIZE, Sword.ONE, armor[0]);
+           player = new Player(Constants.PLAYER_START_SPEED, Constants.PLAYER_START_SIZE, Sword.ONE, Armor.ONE);
         }
         if (animateSword == true) {
             swordAnimation();
@@ -198,8 +196,10 @@ public class MainScreen extends ApplicationAdapter {
         shapeRend.end();
         
         batch.begin();
-        batch.draw(player.getSprite(), cam.position.x, cam.position.y, player.getSprite().getRegionWidth() * Constants.PLAYER_SCALE_VALUE, player.getSprite().getRegionHeight() * Constants.PLAYER_SCALE_VALUE);
         renderZombies();
+        batch.draw(armor[player.getArmor().getIndex()], cam.position.x, cam.position.y, 
+                         armor[player.getArmor().getIndex()].getRegionWidth() * Constants.PLAYER_SCALE_VALUE, 
+                         armor[player.getArmor().getIndex()].getRegionHeight() * Constants.PLAYER_SCALE_VALUE);
         int count = 0;
         for(Sprite sprite : player.getPowers().values()) {           
             batch.draw(sprite, cam.position.x - 32.5F + count * 15, cam.position.y - 65F, 10F, 10F);
@@ -209,9 +209,9 @@ public class MainScreen extends ApplicationAdapter {
             batch.draw(firePower, firePower.getX(), firePower.getY(), firePower.getRegionWidth() * 0.35F, firePower.getRegionHeight() * 0.35F);
         }
         drawSword();
-        font.draw(batch, "HP: " + player.getHP(), cam.position.x - 140, cam.position.y + 80);
+        font.draw(batch, "HP: " + (player.getHP() + player.getArmorHP()), cam.position.x - 140, cam.position.y + 80);
         font.draw(batch, "Level: " + level, cam.position.x - 140, cam.position.y + 70);
-        font.draw(batch, "Zombies Killed: " + deadShapes, cam.position.x - 140, cam.position.y + 60);
+        font.draw(batch, "Zombies Killed: " + (level * 10 - 10 + deadShapes), cam.position.x - 140, cam.position.y + 60);
         font.draw(batch, "Zombies Alive: " + (totalShapes - deadShapes), cam.position.x - 140, cam.position.y + 50);
         font.draw(batch, "Points: " + player.getPoints(), cam.position.x - 140, cam.position.y + 40);
         batch.end();
@@ -265,6 +265,11 @@ public class MainScreen extends ApplicationAdapter {
 //            shapeRend.rect(shape.getxPos(), shape.getyPos(), shape.getSize(),
 //                    shape.getSize());
 //        } 
+    	shapeRend.set(ShapeType.Filled);
+        shapeRend.setColor(Color.RED);
+        shapeRend.rect(cam.position.x - 125F, cam.position.y + 75F, (float) player.getHP() * 3, 6F);
+        shapeRend.setColor(Color.CYAN);
+        shapeRend.rect(cam.position.x - 125F + (float) player.getHP() * 3, cam.position.y + 75F, (float) player.getArmorHP() * 3, 6F);
         
         shapeRend.set(ShapeType.Line);
         shapeRend.setColor(Color.BLACK);      
@@ -422,21 +427,21 @@ public class MainScreen extends ApplicationAdapter {
                 touchedBox();
             }
             
-            for(int i = 0; i < player.getPowers().size(); i++) {
-                powerButtons.setX(cam.position.x - 32.5F + i * 25);
-                powerButtons.setX(cam.position.y - 60F);
-                powerButtons.setSize(20F);
-                if(powerButtons.contains(coords.x, coords.y)) {
-                    int c = 0;
-                    for(Power p : player.getPowers().keySet()) {
-                        if(c == i) {
-                            doPower(p.toString());
-                            break;
-                        }
-                        c++;
-                    }
-                }
-            }
+//            for(int i = 0; i < player.getPowers().size(); i++) {
+//                powerButtons.setX(cam.position.x - 32.5F + i * 25);
+//                powerButtons.setX(cam.position.y - 60F);
+//                powerButtons.setSize(20F);
+//                if(powerButtons.contains(coords.x, coords.y)) {
+//                    int c = 0;
+//                    for(Power p : player.getPowers().keySet()) {
+//                        if(c == i) {
+//                            doPower(p.toString());
+//                            break;
+//                        }
+//                        c++;
+//                    }
+//                }
+//            }
         }
         
         if(Gdx.input.isKeyPressed(Input.Keys.B) && player.getPowers().containsKey(Power.FIRE)) {
@@ -508,19 +513,36 @@ public class MainScreen extends ApplicationAdapter {
             } 
             player.setPoints(player.getPoints() - 950);
             
-            int rand = MathUtils.random(100);
-            for(Sword s : Sword.values()) {
-                if(rand >= s.getRarity()) {
-                    continue;
-                } else {
-                    if(s.getRarity() >= player.getSword().getRarity()) {
-                        System.out.println("You got nothing of value.");
-                    } else {
-                        System.out.println("You got sword: " + s);
-                        player.setSword(s);
-                    }
-                    break;
-                }
+            int rand = MathUtils.random(200);
+            if(MathUtils.random(1) == 0) {
+	            for(Sword s : Sword.values()) {
+	                if(rand >= s.getRarity()) {
+	                    continue;
+	                } else {
+	                    if(s.getRarity() >= player.getSword().getRarity()) {
+	                        System.out.println("You got nothing of value.");
+	                    } else {
+	                        System.out.println("You got sword: " + s);
+	                        player.setSword(s);
+	                    }
+	                    break;
+	                }
+	            }
+            } else {
+            	for(Armor a : Armor.values()) {
+	                if(rand >= a.getRarity()) { 
+	                    continue;
+	                } else {
+	                    if(a.getRarity() >= player.getArmor().getRarity() && player.getArmorHP() >= a.getHP()) {
+	                        System.out.println("You got nothing of value.");
+	                    } else {
+	                        System.out.println("You got armor (rarity" + rand + "): " + a);
+	                        player.setArmor(a);
+	                        player.setArmorHP(a.getHP());
+	                    }
+	                    break;
+	                }
+	            }
             }
             
             boxCounter = 60;

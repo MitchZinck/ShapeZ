@@ -1,15 +1,10 @@
 package com.mzinck.shapez;
 
 public enum Armor {
-    TEN(9, 1, 9),
-    NINE(8, 2, 8),
-    EIGHT(7, 5, 7),
-    SEVEN(6, 10, 6),
-    SIX(5, 20, 5),
-    FIVE(4, 30, 4),
-    FOUR(3, 90, 3),
-    THREE(2, 100, 2),
-    TWO(1, 200, 1),
+    FIVE(10, 1, 4),
+    FOUR(9, 10, 3),
+    THREE(7, 20, 2),
+    TWO(5, 30, 1),
     ONE(0, 1000, 0);
     
     private int hp,
